@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_grad"
+    tools:context=".ui.dashboard.DashboardFragment">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/noimg">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No Image Chosen"
+            android:textSize="30sp"
+            android:textColor="#212121"
+            android:layout_gravity="center_horizontal"
+            android:fontFamily="sans-serif-medium"
+            android:textStyle="italic"
+            android:layout_marginTop="50dp"/>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/selfie"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="120dp"
+            android:layout_marginStart="20dp"
+            android:background="@android:color/transparent"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Press the camera icon to take a picture!"
+            android:textSize="30sp"
+            android:textColor="#212121"
+            android:layout_gravity="center_horizontal"
+            android:fontFamily="sans-serif-medium"
+            android:textStyle="italic"
+            android:layout_marginTop="170dp"/>
+    </FrameLayout>
+    <ProgressBar
+        android:id="@+id/indeterminateBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="200dp"
+        android:visibility="invisible"
+        />
+    <ImageView
+        android:layout_centerHorizontal="true"
+        android:layout_width="400dp"
+        android:padding="1dp"
+        android:layout_marginBottom="150dp"
+        android:cropToPadding="true"
+        android:layout_height="wrap_content"
+        android:id="@+id/img" />
+    <ToggleButton
+        android:layout_gravity="bottom|center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textOff="Show lines only"
+        android:textOn="Show image"
+        android:layout_marginBottom="20dp"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/linesToggle"
+        android:id="@+id/linesButton" />
+    <ToggleButton
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/linesToggle"
+        android:layout_marginBottom="30dp"
+        android:textOn="Lines ON"
+        android:textOff="Lines OFF"/>
+
+</RelativeLayout>
