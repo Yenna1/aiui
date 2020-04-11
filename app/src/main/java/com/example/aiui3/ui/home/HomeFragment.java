@@ -67,7 +67,7 @@ public class HomeFragment extends Fragment {
         navView.getMenu().getItem(1).setEnabled(true);
         navView.getMenu().getItem(2).setEnabled(true);
         pb = getActivity().findViewById(R.id.pbBar);
-        pb.setVisibility(View.VISIBLE);
+        pb.setVisibility(View.VISIBLE); //visible
     }
     private class tTask extends AsyncTask<RecyclerView, Void, Void> {
         RecyclerView recyclerView;
