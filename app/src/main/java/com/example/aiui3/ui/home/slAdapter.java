@@ -1,19 +1,30 @@
 package com.example.aiui3.ui.home;
 
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.os.AsyncTask;
+import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.aiui3.ImageSaver;
+import com.example.aiui3.MainActivity;
 import com.example.aiui3.R;
 import com.example.aiui3.ui.dashboard.DashboardFragment;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.core.util.Pair;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class slAdapter extends RecyclerView.Adapter<slAdapter.MyViewHolder> {
@@ -53,6 +64,15 @@ public class slAdapter extends RecyclerView.Adapter<slAdapter.MyViewHolder> {
                     DashboardFragment.linesBitMap = mDataset.get(p).first.second;
                     DashboardFragment.onlyLinesBitMap = mDataset.get(p).second;
                     Toast.makeText(v.getContext(), "Image selected!", Toast.LENGTH_SHORT).show();
+                    RecyclerView recycler = (RecyclerView) ((Activity) v.getContext()).
+                            findViewById(R.id.savedList);
+                    for (int i = 0; i <recycler.getChildCount(); i++){
+                        RecyclerView.ViewHolder holder = recycler.getChildViewHolder(recycler.getChildAt(i));
+                        ((MyViewHolder) holder).cardView.findViewWithTag("card").setBackgroundColor(
+                                Color.argb(255, 255, 255, 255));
+                    }
+                    v.findViewWithTag("card").setBackgroundResource(R.drawable.click_grad);
+                    fragmentJump(v.getContext());
                 }
             }
         });
@@ -64,8 +84,11 @@ public class slAdapter extends RecyclerView.Adapter<slAdapter.MyViewHolder> {
     public void onBindViewHolder(MyViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        ((ImageView)holder.cardView.findViewWithTag("img")).setImageBitmap(mDataset.get(position).first.first);
-        ((ImageView)holder.cardView.findViewWithTag("img2")).setImageBitmap(mDataset.get(position).first.second);
+        // Log.e("unlucky", "pog");
+        Bitmap bitmap = getResizedBitmap(mDataset.get(position).first.first, 400);
+        Bitmap bitmap2 = getResizedBitmap(mDataset.get(position).first.second, 400);
+        ((ImageView)holder.cardView.findViewWithTag("img")).setImageBitmap(bitmap);
+        ((ImageView)holder.cardView.findViewWithTag("img2")).setImageBitmap(bitmap2);
 
 
     }
@@ -75,5 +98,31 @@ public class slAdapter extends RecyclerView.Adapter<slAdapter.MyViewHolder> {
         return mDataset.size();
     }
 
+    private Bitmap getResizedBitmap(Bitmap image, int maxSize) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float bitmapRatio = (float)width / (float) height;
+        if (bitmapRatio > 0) {
+            width = maxSize;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxSize;
+            width = (int) (height * bitmapRatio);
+        }
+        return Bitmap.createScaledBitmap(image, width, height, true);
+    }
+
+    private void fragmentJump(Context c){
+        Fragment f = new DashboardFragment();
+        switchContent(R.id.nav_host_fragment, f, c);
+    }
+
+    public void switchContent(int id, Fragment fragment, Context c) {
+            MainActivity mainActivity = (MainActivity) c;
+            Fragment frag = fragment;
+            mainActivity.switchContent(id, frag);
+
+    }
 
 }

@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">aiui3</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_home">Saved</string>
+    <string name="title_dashboard">Image</string>
+    <string name="title_notifications">Camera</string>
 </resources>

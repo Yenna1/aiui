@@ -49,12 +49,13 @@
         />
     <ImageView
         android:layout_centerHorizontal="true"
-        android:layout_width="400dp"
+        android:layout_width="360dp"
+        android:layout_height="480dp"
         android:padding="1dp"
-        android:layout_marginBottom="150dp"
+        android:layout_marginTop="50dp"
         android:cropToPadding="true"
-        android:layout_height="wrap_content"
-        android:id="@+id/img" />
+        android:id="@+id/img"
+        android:scaleType="fitXY"/>
     <ToggleButton
         android:layout_gravity="bottom|center"
         android:layout_width="wrap_content"

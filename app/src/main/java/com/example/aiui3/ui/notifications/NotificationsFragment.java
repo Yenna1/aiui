@@ -2,39 +2,39 @@ package com.example.aiui3.ui.notifications;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+
 import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraX;
-import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.ImageAnalysisConfig;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureConfig;
-import androidx.camera.core.ImageProxy;
+
 import androidx.camera.core.Preview;
 import androidx.camera.core.PreviewConfig;
-import androidx.core.app.ActivityCompat;
+
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
+
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ViewModelProviders;
+
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.ContextWrapper;
-import android.content.SharedPreferences;
+
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
+
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
+
 import android.graphics.Matrix;
+
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.util.Base64;
+
+import android.provider.MediaStore;
 import android.util.Rational;
 import android.util.Size;
 import android.view.LayoutInflater;
@@ -50,22 +50,21 @@ import android.widget.ToggleButton;
 
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
-import com.chaquo.python.android.AndroidPlatform;
 import com.example.aiui3.ImageSaver;
 import com.example.aiui3.MainActivity;
 import com.example.aiui3.R;
 import com.example.aiui3.ui.dashboard.DashboardFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.nio.file.Files;
-import java.util.Arrays;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import static android.app.Activity.RESULT_OK;
 
 public class NotificationsFragment extends Fragment implements LifecycleOwner {
     private int REQUEST_CODE_PERMISSIONS = 10; //arbitrary number, can be changed accordingly
@@ -75,6 +74,7 @@ public class NotificationsFragment extends Fragment implements LifecycleOwner {
     ImageCapture imgCap = null;
     private CameraX.LensFacing lensFacing = CameraX.LensFacing.BACK;
     private ImageButton switchButton;
+    private ImageButton uploadButton;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -108,6 +108,8 @@ public class NotificationsFragment extends Fragment implements LifecycleOwner {
 
 
         switchButton = getActivity().findViewById(R.id.switch_button);
+        uploadButton = getActivity().findViewById(R.id.upload_button);
+
         switchButton.setOnClickListener(v -> {
             lensFacing = lensFacing == CameraX.LensFacing.FRONT ? CameraX.LensFacing.BACK : CameraX.LensFacing.FRONT;
             try {
@@ -117,6 +119,12 @@ public class NotificationsFragment extends Fragment implements LifecycleOwner {
             } catch (CameraInfoUnavailableException e) {
                 // Do nothing
             }
+        });
+        uploadButton.setOnClickListener(v -> {
+            Intent i = new Intent(Intent.ACTION_PICK,
+                    android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+            final int ACTIVITY_SELECT_IMAGE = 1234;
+            startActivityForResult(i, ACTIVITY_SELECT_IMAGE);
         });
 
         getActivity().findViewById(R.id.capture_button).setOnClickListener(new View.OnClickListener() {
@@ -131,7 +139,7 @@ public class NotificationsFragment extends Fragment implements LifecycleOwner {
                         DashboardFragment.bitmap = rotate(file);
                         Toast.makeText(getActivity().getBaseContext(), msg,Toast.LENGTH_LONG).show();
                         File[] files = {file};
-                        new FileTask((MainActivity) getActivity(), getContext()).execute(files);
+                        new FileTask((MainActivity) getActivity(), getContext(), true).execute(files);
 
                     }
 
@@ -212,8 +220,13 @@ public class NotificationsFragment extends Fragment implements LifecycleOwner {
         return true;
     }
 
-    private void line(File file, Context c){
-        Bitmap bmp = rotate(file);
+    private void line(File file, Context c, boolean b){
+        Bitmap bmp;
+        if (b)
+            bmp = rotate(file);
+        else
+            bmp = BitmapFactory.decodeFile(file.getPath());
+        //bmp = getResizedBitmap(bmp, 400);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] bytes = stream.toByteArray();
@@ -256,16 +269,18 @@ public class NotificationsFragment extends Fragment implements LifecycleOwner {
         MainActivity activity;
         Context c;
         File f;
+        boolean b;
 
-        FileTask(MainActivity a, Context c){
+        FileTask(MainActivity a, Context c, boolean b){
             this.activity = a;
             this.c = c;
+            this.b = b;
         }
         protected Void doInBackground(File... files) {
             DashboardFragment.onlyLinesBitMap = null;
             DashboardFragment.linesBitMap = null;
             f = files[0];
-            line(f, c);
+            line(f, c, b);
             return null;
         }
 
@@ -323,6 +338,67 @@ public class NotificationsFragment extends Fragment implements LifecycleOwner {
         // Apply declared configs to CameraX using the same lifecycle owner
         CameraX.bindToLifecycle(this, preview, imgCap);
     }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch(requestCode) {
+            case 1234:
+                if(resultCode == RESULT_OK){
+                    Uri selectedImage = data.getData();
+                    String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+                    Cursor cursor = getActivity().getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+                    cursor.moveToFirst();
+
+                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                    String filePath = cursor.getString(columnIndex);
+                    cursor.close();
+                    File file = new File(filePath);
+                    String msg = "Photo selected!";
+                    DashboardFragment.bitmap = BitmapFactory.decodeFile(filePath);
+                    Toast.makeText(getActivity().getBaseContext(), msg,Toast.LENGTH_LONG).show();
+                    File filev = new File(Environment.getExternalStorageDirectory() + "/aiuiImages/" + file.getName() + ".jpg");
+
+                    InputStream in = null;
+                    OutputStream out = null;
+                    try {
+                        in = new FileInputStream(file);
+                        out = new FileOutputStream(filev);
+                        byte[] buf = new byte[1024];
+                        int len;
+                        while ((len = in.read(buf)) > 0) {
+                            out.write(buf, 0, len);
+                        }
+                        in.close();
+                        out.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
 
+                    // Copy the bits from instream to outstream
+
+                    File[] files = {filev};
+                    new FileTask((MainActivity) getActivity(), getContext(), false).execute(files);
+                    /* Now you have choosen image in Bitmap format in object "yourSelectedImage". You can use it in way you want! */
+                }
+        }
+
+    }
+    private Bitmap getResizedBitmap(Bitmap image, int maxSize) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float bitmapRatio = (float)width / (float) height;
+        if (bitmapRatio > 0) {
+            width = maxSize;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxSize;
+            width = (int) (height * bitmapRatio);
+        }
+        return Bitmap.createScaledBitmap(image, width, height, true);
+    }
 }

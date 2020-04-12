@@ -1,49 +1,28 @@
 package com.example.aiui3.ui.home;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+
 import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.DefaultItemAnimator;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.aiui3.ImageSaver;
-import com.example.aiui3.MainActivity;
 import com.example.aiui3.R;
-import com.example.aiui3.ui.dashboard.DashboardFragment;
-import com.example.aiui3.ui.notifications.NotificationsFragment;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Writer;
 import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
@@ -93,6 +72,7 @@ public class HomeFragment extends Fragment {
                             setFileName("myImage3.png").
                             setDirectoryName(f.getName()).
                             load();
+
                     bList.add(new Pair<Pair<Bitmap, Bitmap>, Bitmap>(new Pair<Bitmap, Bitmap>(bitmap, bitmap2), bitmap3));
                 }
             }
@@ -107,4 +87,5 @@ public class HomeFragment extends Fragment {
             pb.setVisibility(View.INVISIBLE);
         }
     }
+
 }
